@@ -5,6 +5,11 @@ import store from './store'
 
 Vue.config.productionTip = false
 
+import fastclick from 'fastclick';
+fastclick.attach(document.body);
+
+import './common/stylus/index.styl';
+
 new Vue({
   router,
   store,
