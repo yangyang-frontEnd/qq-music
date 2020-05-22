@@ -1,7 +1,11 @@
 <template>
     <div>
+        <!-- 头部 -->
         <Header></Header>
+        <!-- 操作区 路由链接 -->
         <Tab></Tab>
+
+        <!-- 点击路由的主题 -->
         <router-view></router-view>
     </div>
 </template>
