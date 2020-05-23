@@ -1,31 +1,34 @@
 <template>
     <div class="recommend">
         <Scroll class="recommend-content" :scroll="scroll" :click="scrollClick" :data='DiskList'>
-                <div v-if='RecommendLists.length>0 && DiskList.length>0 '>
-                    <!-- 轮播 -->
-                    <swiper class="swiper" :options="swiperOption">
+            <div v-if='RecommendLists.length>0 && DiskList.length>0 '>
+                <!-- 轮播 -->
+                <swiper class="swiper" :options="swiperOption" v-if='isKeepAlive'>
 
-                        <swiper-slide v-for="(item,index) in RecommendLists">
-                            <img :src="item.pic_info.url" alt="" class="itemimg">
-                        </swiper-slide>
+                    <swiper-slide v-for="(item,index) in RecommendLists" :key="index">
+                        <img :src="item.pic_info.url" alt="" class="itemimg">
+                    </swiper-slide>
 
-                        <div class="swiper-pagination" slot="pagination"></div>
-                    </swiper>
+                    <div class="swiper-pagination" slot="pagination"></div>
+                </swiper>
 
-                    <!-- 歌单数据 -->
-                    <div class='recommed-list' v-for='(item, index)  in DiskList' :key='index'>
-                        <p class='list-title'>{{item.title}}</p>
-                        <ul class='list_ul'>
-                            <li class='item' v-for='(disk,_index) in item.items' :key='_index'>
-                                <div class='icon'>
-                                    <img :src="disk.img_url" alt="">
-                                </div>
-                                <p class='text'>{{disk.text}}</p>
-                                <p class='text'>播放量 : {{disk.num}} 万</p>
-                            </li>
-                        </ul>
-                    </div>
+                <!-- 歌单数据 -->
+                <div class='recommed-list' v-for='(item, index)  in DiskList' :key='index'>
+                    <p class='list-title'>{{item.title}}</p>
+                    <ul class='list_ul'>
+                        <li class='item' v-for='(disk,_index) in item.items' :key='_index'>
+                            <div class='icon'>
+                                <img v-lazy="disk.img_url" alt="">
+                            </div>
+                            <p class='text'>{{disk.text}}</p>
+                            <p class='text'>播放量 : {{disk.num}} 万</p>
+                        </li>
+                    </ul>
                 </div>
+            </div>
+            <div v-else>
+                <Loading title='正在加载...'/>
+            </div>
         </Scroll>
     </div>
 </template>
@@ -33,14 +36,18 @@
 <script>
     import {getRecommend, getDiskList} from '../../api/recommend'
     import Scroll from '../../base/scroll/scroll'
+    import Loading from '../../base/loading/loading.vue'
+
 
     export default {
         components: {
-            Scroll
+            Scroll,
+            Loading
         },
         name: "Recommend",
         data() {
             return {
+                isKeepAlive: false,
                 scroll: 'Y',
                 scrollClick: true,
                 RecommendLists: [],
@@ -71,6 +78,21 @@
 
             //获取推荐页面的歌单数据
             this._getDiskList()
+
+            //模拟延迟
+            // setTimeout(() => {
+            //     this._getRecommend()
+            //     this._getDiskList()
+            // }, 1000)
+        },
+        //keep-alive 两个生命周期
+        //加载
+        activated() {
+            this.isKeepAlive = true
+        },
+        //卸载
+        deactivated() {
+            this.isKeepAlive = false
         },
         methods: {
             //因为上下滚动是多个页面都需要的,把滚动业务封装成一个组件

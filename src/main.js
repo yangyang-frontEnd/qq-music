@@ -42,6 +42,14 @@ import VueAwesomeSwiper from 'vue-awesome-swiper'
 import 'swiper/css/swiper.css'
 Vue.use(VueAwesomeSwiper, /* { default options with global component } */)
 
+//集成图片懒加载
+import VueLazyload from 'vue-lazyload'
+Vue.use(VueLazyload)
+// or with options
+Vue.use(VueLazyload, {
+  loading: './common/image/img.png',
+})
+
 new Vue({
   router,
   store,

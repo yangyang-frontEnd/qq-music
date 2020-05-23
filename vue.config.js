@@ -37,6 +37,23 @@ module.exports = {
                     console.log('歌单数据请求失败!')
                 })
             })
+
+            app.get('/api/getSingerList', (request, response) => {
+                const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
+
+                axios.get(url, {
+                    params: request.query,
+                    headers: {
+                        "Referer": "https://y.qq.com/portal/singer_list.html",
+                        "Origin": "https://y.qq.com"
+                    }
+                }).then(res => {
+                    console.log('歌手列表数据请求成功')
+                    response.json(res.data)
+                }).catch(error => {
+                    console.log('歌手列表数据请求失败!')
+                })
+            })
         }
     }
 }

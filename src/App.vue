@@ -6,7 +6,9 @@
         <Tab></Tab>
 
         <!-- 点击路由的主题 -->
+        <keep-alive>
         <router-view></router-view>
+        </keep-alive>
     </div>
 </template>
 
