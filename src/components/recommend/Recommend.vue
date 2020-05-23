@@ -1,42 +1,50 @@
 <template>
     <div class="recommend">
-        <div class="recommend-content">
-            <!-- 轮播 -->
-            <swiper class="swiper" :options="swiperOption">
-                <swiper-slide v-for="(item,index) in RecommendLists">
-                    <img :src="item.pic_info.url" alt="" class="itemimg">
-                </swiper-slide>
+        <Scroll class="recommend-content" :scroll="scroll" :click="scrollClick" :data='DiskList'>
+                <div v-if='RecommendLists.length>0 && DiskList.length>0 '>
+                    <!-- 轮播 -->
+                    <swiper class="swiper" :options="swiperOption">
 
-                <div class="swiper-pagination" slot="pagination"></div>
-            </swiper>
+                        <swiper-slide v-for="(item,index) in RecommendLists">
+                            <img :src="item.pic_info.url" alt="" class="itemimg">
+                        </swiper-slide>
 
-            <!-- 歌单数据 -->
-            <div class='recommed-list' v-for='(item, index)  in DiskList' :key='index'>
-                <p class='list-title'>{{item.title}}</p>
-                <ul class='list_ul'>
-                    <li class='item' v-for='(disk,_index) in item.items' :key='_index'>
-                        <div class='icon'>
-                            <img :src="disk.img_url" alt="">
-                        </div>
-                        <p class='text'>{{disk.text}}</p>
-                        <p class='text'>播放量 : {{disk.num}} 万</p>
-                    </li>
-                </ul>
-            </div>
-        </div>
+                        <div class="swiper-pagination" slot="pagination"></div>
+                    </swiper>
 
+                    <!-- 歌单数据 -->
+                    <div class='recommed-list' v-for='(item, index)  in DiskList' :key='index'>
+                        <p class='list-title'>{{item.title}}</p>
+                        <ul class='list_ul'>
+                            <li class='item' v-for='(disk,_index) in item.items' :key='_index'>
+                                <div class='icon'>
+                                    <img :src="disk.img_url" alt="">
+                                </div>
+                                <p class='text'>{{disk.text}}</p>
+                                <p class='text'>播放量 : {{disk.num}} 万</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+        </Scroll>
     </div>
 </template>
 
 <script>
     import {getRecommend, getDiskList} from '../../api/recommend'
+    import Scroll from '../../base/scroll/scroll'
 
     export default {
+        components: {
+            Scroll
+        },
         name: "Recommend",
         data() {
             return {
+                scroll: 'Y',
+                scrollClick: true,
                 RecommendLists: [],
-                DiskList:[],
+                DiskList: [],
                 swiperOption: {
                     loop: true,
                     pagination: {
@@ -65,6 +73,9 @@
             this._getDiskList()
         },
         methods: {
+            //因为上下滚动是多个页面都需要的,把滚动业务封装成一个组件
+            //把需要的dom元素传进去,这个组件就能实现对该部分dom 上下滚动的需求
+            //借助 插槽 的概念完成，一个组件的dom结构是由外部传递进去的
             _getRecommend() {
                 getRecommend().then(res => {
                     // console.log(res)
@@ -81,11 +92,11 @@
                     this._normailize(res.data.MusicHallHomePage.data.v_shelf)
 
                     //this.DiskList = this._normailize(res.data.MusicHallHomePage.data.v_shelf)
-                    this.DiskList=this._normailize(res.data.MusicHallHomePage.data.v_shelf)
+                    this.DiskList = this._normailize(res.data.MusicHallHomePage.data.v_shelf)
 
                 })
             },
-            _normailize(data){
+            _normailize(data) {
 
                 let _data = [
                     // {
@@ -98,30 +109,30 @@
                     // }
                 ]
 
-                if(data && Array.isArray(data) ){//如果服务返回数据
+                if (data && Array.isArray(data)) {//如果服务返回数据
                     //for
-                    data.forEach((item)=>{
-                        if(item.title_template=='分类专区') {
+                    data.forEach((item) => {
+                        if (item.title_template === '分类专区') {
                             return
                         }
                         let obj = {}
-                        obj.title=item.title_template
-                        obj.items= []
-                        if(Array.isArray(item.v_niche[0].v_card)){
-                            item.v_niche[0].v_card.forEach((disk)=>{
-                                let _obj ={}
-                                _obj.img_url= disk.cover.replace(/300/, '600')
-                                _obj.text=disk.title
-                                _obj.num= (disk.cnt/10000).toFixed(1)//获取小数点后一位
+                        obj.title = item.title_template
+                        obj.items = []
+                        if (Array.isArray(item.v_niche[0].v_card)) {
+                            item.v_niche[0].v_card.forEach((disk) => {
+                                let _obj = {}
+                                _obj.img_url = disk.cover.replace(/300/, '600')
+                                _obj.text = disk.title
+                                _obj.num = (disk.cnt / 10000).toFixed(1)//获取小数点后一位
                                 obj.items.push(_obj)
                             })
 
                             _data.push(obj)
-                        }else{
+                        } else {
                             throw new Error('遍历的数据不是一个数组')
                         }
                     })
-                }else{
+                } else {
                     throw new Error('获取歌单数据不是一个数组')
                 }
 
