@@ -20,6 +20,23 @@ module.exports = {
                 })
             })
 
+            app.get('/api/getDislList', (request, response) => {
+                const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
+
+                axios.get(url, {
+                    params: request.query,
+                    headers: {
+                        "Referer": "https://y.qq.com/m/index.html",
+                        "Origin": "https://y.qq.com"
+                    }
+                }).then(res => {
+                    console.log('歌单数据请求成功')
+                    // console.log(res.data)
+                    response.json(res.data)
+                }).catch(error => {
+                    console.log('歌单数据请求失败!')
+                })
+            })
         }
     }
 }

@@ -9,19 +9,34 @@
 
                 <div class="swiper-pagination" slot="pagination"></div>
             </swiper>
+
+            <!-- 歌单数据 -->
+            <div class='recommed-list' v-for='(item, index)  in DiskList' :key='index'>
+                <p class='list-title'>{{item.title}}</p>
+                <ul class='list_ul'>
+                    <li class='item' v-for='(disk,_index) in item.items' :key='_index'>
+                        <div class='icon'>
+                            <img :src="disk.img_url" alt="">
+                        </div>
+                        <p class='text'>{{disk.text}}</p>
+                        <p class='text'>播放量 : {{disk.num}} 万</p>
+                    </li>
+                </ul>
+            </div>
         </div>
 
     </div>
 </template>
 
 <script>
-    import {getRecommend} from '../../api/recommend'
+    import {getRecommend, getDiskList} from '../../api/recommend'
 
     export default {
         name: "Recommend",
         data() {
             return {
                 RecommendLists: [],
+                DiskList:[],
                 swiperOption: {
                     loop: true,
                     pagination: {
@@ -30,13 +45,24 @@
                     autoplay: {
                         delay: 1000,
                         stopOnLastSlide: false,// 停止轮播
-                        disableOnInteraction: false,//禁用交互
+                        disableOnInteraction: true,//禁用交互
                     }
                 }
             }
         },
         created() {
+            //注释习惯
+
+            /*获取轮播图的数据
+            * 参数：参数1 number
+            *       参数2 array
+            * 返回：类型
+            * */
+
             this._getRecommend()
+
+            //获取推荐页面的歌单数据
+            this._getDiskList()
         },
         methods: {
             _getRecommend() {
@@ -46,8 +72,63 @@
                     this.RecommendLists = res
                 })
 
+            },
+            _getDiskList() {
+                getDiskList().then(res => {
+                    // console.log(res.data.MusicHallHomePage.data.v_shelf)
 
+                    //对于服务器返回的数据最好不要直接使用
+                    this._normailize(res.data.MusicHallHomePage.data.v_shelf)
+
+                    //this.DiskList = this._normailize(res.data.MusicHallHomePage.data.v_shelf)
+                    this.DiskList=this._normailize(res.data.MusicHallHomePage.data.v_shelf)
+
+                })
+            },
+            _normailize(data){
+
+                let _data = [
+                    // {
+                    // 	"title":'官方推荐',
+                    // 	"items":[{
+                    // 		img_url:,
+                    // 		text:'',
+                    // 		num:
+                    // 	}]
+                    // }
+                ]
+
+                if(data && Array.isArray(data) ){//如果服务返回数据
+                    //for
+                    data.forEach((item)=>{
+                        if(item.title_template=='分类专区') {
+                            return
+                        }
+                        let obj = {}
+                        obj.title=item.title_template
+                        obj.items= []
+                        if(Array.isArray(item.v_niche[0].v_card)){
+                            item.v_niche[0].v_card.forEach((disk)=>{
+                                let _obj ={}
+                                _obj.img_url= disk.cover.replace(/300/, '600')
+                                _obj.text=disk.title
+                                _obj.num= (disk.cnt/10000).toFixed(1)//获取小数点后一位
+                                obj.items.push(_obj)
+                            })
+
+                            _data.push(obj)
+                        }else{
+                            throw new Error('遍历的数据不是一个数组')
+                        }
+                    })
+                }else{
+                    throw new Error('获取歌单数据不是一个数组')
+                }
+
+
+                return _data
             }
+
         }
     }
 </script>
